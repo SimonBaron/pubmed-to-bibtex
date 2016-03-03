@@ -8,7 +8,7 @@ def get_record(number):
 
     handle = Entrez.efetch("pubmed", id=number, retmode="xml")
     records = Entrez.parse(handle)
-    a = list(records)
+    a =  list(records)
     handle.close()
     return a
 
@@ -23,14 +23,48 @@ def full_info(records):
             print "\t"
             print record["MedlineCitation"][key]
 
+def expand(records):
+    if hasattr(records, '__iter__'):
+        if isinstance(records, list):
+            for item in records:
+                expand(item)
+        else:
+            for item in records:
+                expand(records[item])
+    else:
+        print records
 
+def list_expand(records):
+    if hasattr(records, '__iter__'):
+        if isinstance(records, list):
+            for item in records:
+                list_expand(item)
+        else:
+            for item in records:
+                dict_expand(item, records[item])
+    else:
+        print records
+    
+def dict_expand(key, records):
+    if hasattr(records, '__iter__'):
+        if isinstance(records, list):
+            for item in records:
+                list_expand(item)
+        else:
+            for item in records:
+                dict_expand(item, records[item])
+    else:
+        print key, "\t", records
+        
 print "starting"
 
-records = get_record("14716003")#"19304878,14630660")
+records = get_record("14716004")#"19304878,14630660")
 
-summarise_record(records)
+expand(records)
 
-full_info(records)
+#summarise_record(records)
+
+#full_info(records)
 
 # count = 0
 # for record in records:
