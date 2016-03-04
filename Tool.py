@@ -4,6 +4,7 @@ from Bio import Entrez
 
 Entrez.email = "simon.c.baron@gmail.com"
 
+
 def get_record(number):
 
     handle = Entrez.efetch("pubmed", id=number, retmode="xml")
@@ -23,45 +24,82 @@ def full_info(records):
             print "\t"
             print record["MedlineCitation"][key]
 
-def expand(records):
-    if hasattr(records, '__iter__'):
-        if isinstance(records, list):
-            for item in records:
-                expand(item)
-        else:
-            for item in records:
-                expand(records[item])
-    else:
-        print records
+# def expand(records):
+#     if hasattr(records, '__iter__'):
+#         if isinstance(records, list):
+#             for item in records:
+#                 expand(item)
+#         else:
+#             for item in records:
+#                 expand(records[item])
+#     else:
+#         print records
 
-def list_expand(records):
+def list_expand(records, st,handle):
     if hasattr(records, '__iter__'):
         if isinstance(records, list):
             for item in records:
-                list_expand(item)
+                list_expand(item, st, handle)
         else:
             for item in records:
-                dict_expand(item, records[item])
+                dict_expand(item, records[item], st, handle)
     else:
-        print records
-    
-def dict_expand(key, records):
+        handle.write(st + records+"\n")
+
+def dict_expand(key, records, st, handle):
+    st = st + key + "\t"
+    #print key
     if hasattr(records, '__iter__'):
         if isinstance(records, list):
             for item in records:
-                list_expand(item)
+                list_expand(item, st, handle)
         else:
             for item in records:
-                dict_expand(item, records[item])
+                dict_expand(item, records[item], st, handle)
     else:
-        print key, "\t", records
-        
+        handle.write(st + "\t" + records +"\n")
+
+def bibtex_string(bibtype, id, bibdict):
+    output = bibtype + "{" + str(id) + ",\n"
+    for key in bibdict:
+        output += "\t" + key + " = {" + bibdict[key] + "},\n"
+    return output + "}"
+
+
+bibdict = {
+    "author" : "",
+    "address" : "",
+    "annote" : "",
+    "booktitle" : "",
+    "chapter" : "",
+    "crossref" : "",
+    "edition" : "",
+    "editor" : "",
+    "howpublished" : "",
+    "institution" : "",
+    "journal" : "",
+    "key" : "",
+    "month" : "",
+    "note" : "",
+    "number" : "",
+    "organization" : "",
+    "pages" : "",
+    "publisher" : "",
+    "school" : "",
+    "series" : "",
+    "title" : "",
+    "type" : "",
+    "volume":"",
+    "year":"",
+}
+
 print "starting"
+with open('temp.txt', 'w') as f:
+    records = get_record("18716004")#"19304878,14630660")
+    st = ""
+    list_expand(records,st,f)
 
-records = get_record("14716004")#"19304878,14630660")
-
-expand(records)
-
+print "done"
 #summarise_record(records)
 
 #full_info(records)
@@ -71,7 +109,3 @@ expand(records)
 #     print(record['MedlineCitation']['Article']['ArticleTitle'])
 #     a = record
 #     count += 1
-
-
-
-
