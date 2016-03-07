@@ -1,4 +1,4 @@
-'''testings some things to see if I can make a tool'''
+'''Contact Entrez via BioPython efetch function and return a dictionary object of the information needed for a bibtex format'''
 
 from Bio import Entrez
 
@@ -6,6 +6,8 @@ Entrez.email = "simon.c.baron@gmail.com"
 
 
 def get_record(number):
+    "Given a pubmed ID number, return a list of the parsed xml \
+    - requires internet access and closes connection"
 
     handle = Entrez.efetch("pubmed", id=number, retmode="xml")
     records = Entrez.parse(handle)
@@ -15,17 +17,12 @@ def get_record(number):
 
 
 def summarise_record(records):
+    "Short-cut function prints the title of any papers returned \
+    by get_record()"
     for record in records:
         print(record['MedlineCitation']['Article']['ArticleTitle'])
 
         
-def full_info(records):
-    for record in records:
-        for key in record["MedlineCitation"].keys():
-            print key,
-            print "\t"
-            print record["MedlineCitation"][key]
-
 # def expand(records):
 #     if hasattr(records, '__iter__'):
 #         if isinstance(records, list):
@@ -37,63 +34,56 @@ def full_info(records):
 #     else:
 #         print records
 
-def list_expand(records, st,handle):
+def list_expand(records, st, dct):
+    "list version of expand function - recursively calls itself and \
+    dict version to fully investigate tree of list and dict items"
     if hasattr(records, '__iter__'):
         if isinstance(records, list):
             for item in records:
-                list_expand(item, st, handle)
+                dct = list_expand(item, st, dct)
+            return dct
         else:
             for item in records:
-                dict_expand(item, records[item], st, handle)
+                dct = dict_expand(item, records[item], st, dct)
+            return dct
     else:
-        handle.write(st + records+"\n")
+        return dct
 
-def dict_expand(key, records, st, handle):
+
+def dict_expand(key, records, st, dct):
+    """dict version of expand function - recursively calls itself and
+    list version to fully investigate tree of list and dict items.
+    """
     st = st + key + "\t"
-    check(key, records)
+    tdct = check(key, records, dct)
+    #print dct
     if hasattr(records, '__iter__'):
         if isinstance(records, list):
             for item in records:
-                list_expand(item, st, handle)
+                tdct = list_expand(item, st, tdct)
+            return tdct
         else:
             for item in records:
-                dict_expand(item, records[item], st, handle)
+                tdct = dict_expand(item, records[item], st, tdct)
+            return tdct
     else:
-        handle.write(st + "\t" + records + "\n")
-
-        
-def bibtex_string(id, bib_dict):
-    output = "@" + bib_dict["type"] + "{" + str(id) + ",\n"
-    for key in bib_dict:
-        output += "\t" + key + " = {" + bib_dict[key] + "},\n"
-    return output + "}"
+        return tdct
 
 
-def check(key, entry):
-    global ref_dict
-    if key in ref_dict:
-        ref_dict[key] = entry
-
-def dict_convert(ref_dict, bib_dict):
-    author_string = ""
-    for i in range(len(ref_dict["AuthorList"])):
-        author_string += "{} {} and ".format(
-            ref_dict["AuthorList"][i]["ForeName"],
-            ref_dict["AuthorList"][i]["LastName"])
-    bib_dict["author"] =  author_string[:-4]
-    bib_dict["month"] = ref_dict["DateCompleted"]["Month"]
-    bib_dict["year"] = ref_dict["DateCompleted"]["Year"]
-    bib_dict["volume"] = ref_dict["Volume"]
-    bib_dict["title"] = ref_dict["ArticleTitle"]
-    bib_dict["journal"] = ref_dict["Title"]
-    bib_dict["number"] = ref_dict["Issue"]
-    if str(ref_dict["PublicationTypeList"][0]) == "Journal Article":
-        bib_dict["type"] = "article"
+def check(key, entry, rdict):
+    """called by dict and list expand functions to compare."""
+    if key in rdict.keys():
+        rdict[key] = entry
+    return rdict
 
 
-
-
-
+def from_entrez(reference_dictionary, entrez_id):
+    print "starting"
+    records = get_record(entrez_id)
+    output = []
+    for record in records:
+        output.append(list_expand(record, "", reference_dictionary))
+    return output
 
 ref_dict = {"AuthorList": "",
             "DateCompleted": "",
@@ -107,42 +97,15 @@ ref_dict = {"AuthorList": "",
 
 # check("AuthorList", "hi there!")
 
-bib_dict = {
-    "type": "", ##
-    "author": "", ###
-    "address": "",
-    "annote": "",
-    "booktitle": "",
-    "chapter": "",
-    "crossref": "",
-    "edition": "",
-    "editor": "",
-    "howpublished": "",
-    "institution": "",
-    "journal": "", ##
-    "key": "",
-    "month": "", ###
-    "note": "",
-    "number": "", ##
-    "organization": "",
-    "pages": "", ##
-    "publisher": "",
-    "school": "",
-    "series": "",
-    "title": "", ##
-    "type": "",
-    "volume": "", ###
-    "year": "", ###
-}
 
-print "starting"
-with open('temp.txt', 'w') as f:
-    records = get_record("18716004")#,19304878,14630660")
-    st = ""
-    list_expand(records, st, f)
+#print "starting"
+# with open('temp.txt', 'w') as f:  #
+    # records = get_record("18716004")#,19304878,14630660")
+    # st = ""
+    # list_expand(records, st, f)
+#from_entrez(ref_dict, "18716004")
+#print "done"
 
-print "done"
+#dict_convert(ref_dict, bib_dict)
 
-dict_convert(ref_dict, bib_dict)
-
-print bibtex_string("simon", bib_dict)
+#print bibtex_string("simon", bib_dict)
