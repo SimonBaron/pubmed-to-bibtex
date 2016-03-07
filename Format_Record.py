@@ -1,18 +1,28 @@
+"""Formatting module for pubmed>bibtex converter.
+
+Calls the Fetch_Record module to get pubmed records via entrez,
+and formats them in a bibtex friendly format.
+
+Currently only supports article type documents.
+"""
+
 import Fetch_Record as fetch
 
 def bibtex_string(id, bib_dict):
+    """Reformat a dictionary into a string of bibtex format"""
     output = "@" + bib_dict["type"] + "{" + str(id) + ",\n"
     for key in bib_dict:
         output += "\t" + key + " = {" + bib_dict[key] + "},\n"
     return output + "}"
 
 def dict_convert(ref_dict, bib_dict):
+    """Convert data from pubmed-like dictionary into bibtex-like dict."""
     author_string = ""
     for i in range(len(ref_dict["AuthorList"])):
         author_string += "{} {} and ".format(
             ref_dict["AuthorList"][i]["ForeName"],
             ref_dict["AuthorList"][i]["LastName"])
-    bib_dict["author"] =  author_string[:-4]
+    bib_dict["author"] = author_string[:-4]
     bib_dict["month"] = ref_dict["DateCompleted"]["Month"]
     bib_dict["year"] = ref_dict["DateCompleted"]["Year"]
     bib_dict["volume"] = ref_dict["Volume"]
@@ -23,8 +33,8 @@ def dict_convert(ref_dict, bib_dict):
         bib_dict["type"] = "article"
 
 bib_dict = {
-    "type": "", ##
-    "author": "", ###
+    "type": "",
+    "author": "",
     "address": "",
     "annote": "",
     "booktitle": "",
@@ -34,20 +44,20 @@ bib_dict = {
     "editor": "",
     "howpublished": "",
     "institution": "",
-    "journal": "", ##
+    "journal": "",
     "key": "",
-    "month": "", ###
+    "month": "",
     "note": "",
-    "number": "", ##
+    "number": "",
     "organization": "",
-    "pages": "", ##
+    "pages": "",
     "publisher": "",
     "school": "",
     "series": "",
-    "title": "", ##
+    "title": "",
     "type": "",
-    "volume": "", ###
-    "year": "", ###
+    "volume": "",
+    "year": "",
 }
 
 citations = fetch.from_entrez(fetch.ref_dict, "18716004")
