@@ -6,9 +6,24 @@ dictionary object of the information needed for a bibtex format
 
 from Bio import Entrez
 
-def get_record(number):
-    """Given a pubmed ID number, return a list of the parsed xml
-    - requires internet access and closes connection"""
+
+def esearch(term, retmax):
+    """Search pubmed database via Entrez.
+
+    Returns ids of papers matching search term, see Entrez for more details.
+    """
+    handle = Entrez.esearch(db="pubmed", term=term, retmax=retmax)
+    result = Entrez.read(handle)
+    handle.close()
+    return result["IdList"]
+
+
+def get_record(number="18206625"):
+    """Fetch and parse XML records from pubmed.
+
+    Given a pubmed ID number, return a list of the parsed xml
+    - requires internet access and closes connection
+    """
     handle = Entrez.efetch("pubmed", id=number, retmode="xml")
     records = Entrez.parse(handle)
     a = list(records)
@@ -17,17 +32,21 @@ def get_record(number):
 
 
 def summarise_record(records):
-    """Short-cut function prints the title of any papers returned
-    by get_record()"""
+    """Short-cut function.
+
+    Prints the title of any papers returned by get_record()
+    """
     for record in records:
         print(record['MedlineCitation']['Article']['ArticleTitle'])
+
 
 def list_expand(records, st, dct):
     """List version of expand function.
 
     Recursively calls itself and dict version to fully investigate
     tree of list and dict items, passing a dictionary
-    which is populated in reference to the keys of the referenct dict input"""
+    which is populated in reference to the keys of the referenct dict input
+    """
     if hasattr(records, '__iter__'):
         if isinstance(records, list):
             for item in records:
@@ -42,7 +61,7 @@ def list_expand(records, st, dct):
 
 
 def dict_expand(key, records, st, dct):
-    """Dict version of expand function
+    """Dict version of expand function.
 
     Recursively calls itself and the list version to fully
     investigate tree of list and dict items, passing a dictionary
@@ -69,25 +88,29 @@ def check(key, entry, rdict):
     Called by dict_sort() to test if this entry needs to be added to the
     output dictionary.
     """
+    d = rdict
     if key in rdict.keys():
-        rdict[key] = entry
-    return rdict
+        d[key] = entry
+    return d
 
 
-def from_entrez(reference_dictionary, entrez_id):
+def from_entrez(reference_dictionary, entrez_term, retmax=20, search=False):
     """Main called function.
 
     Gets records from entrez as defined by ids and returns a list of
     dictionaries with information requred by the converter module.
     """
-    records = get_record(entrez_id)
+    if search:
+        entrez_list = esearch(entrez_term, retmax)
+        entrez_term = ",".join(entrez_list)
+    records = get_record(entrez_term)
     output = []
     for record in records:
-        output.append(list_expand(record, "", reference_dictionary))
+        output.append(list_expand(record, "", reference_dictionary.copy()))
     return output
 
 ref_dict = {"AuthorList": "",
-            "DateCompleted": "",
+            "PubDate": "",
             "Volume": "",
             "PublicationTypeList": "",
             "ArticleTitle": "",
@@ -96,4 +119,7 @@ ref_dict = {"AuthorList": "",
             "MedlinePgn": ""
             }
 
+
 Entrez.email = "simon.c.baron@gmail.com"
+
+r = from_entrez(ref_dict, "heatmap", 2,search=True)
