@@ -79,6 +79,7 @@ def dict_expand(key, records, st, dct):
                 tdct = dict_expand(item, records[item], st, tdct)
             return tdct
     else:
+        #print st
         return tdct
 
 
@@ -88,10 +89,9 @@ def check(key, entry, rdict):
     Called by dict_sort() to test if this entry needs to be added to the
     output dictionary.
     """
-    d = rdict
     if key in rdict.keys():
-        d[key] = entry
-    return d
+        rdict[key] = entry
+    return rdict
 
 
 def from_entrez(reference_dictionary, entrez_term, retmax=20, search=False):
@@ -116,10 +116,11 @@ ref_dict = {"AuthorList": "",
             "ArticleTitle": "",
             "Title": "",        # Journal title
             "Issue": "",        # number
-            "MedlinePgn": ""
+            "MedlinePgn": "",
+            "PMID": ""
             }
 
 
 Entrez.email = "simon.c.baron@gmail.com"
 
-r = from_entrez(ref_dict, "heatmap", 2,search=True)
+r = from_entrez(ref_dict, "heatmap", retmax=1,search=True)

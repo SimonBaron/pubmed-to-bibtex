@@ -2,18 +2,22 @@
 
 Calls the Fetch_Record module to get pubmed records via entrez,
 and formats them in a bibtex friendly format.
-
-Currently only supports article type documents.
 """
 
 import Fetch_Record as fetch
 
+import warnings
 
-def bibtex_string(id, bib_dict):
+
+def bibtex_string(bib_dict, id="default"):
     """Reformat a dictionary into a string of bibtex format."""
+    check_quality(bib_dict)
+    if id == "default":
+        id = bib_dict["id"]
     output = "@" + bib_dict["type"] + "{" + str(id) + ",\n"
     for key in bib_dict:
-        output += "\t" + key + " = {" + bib_dict[key] + "},\n"
+        if bib_dict[key] != "":
+            output += "\t" + key + " = {" + bib_dict[key] + "},\n"
     return output + "}"
 
 
@@ -21,21 +25,24 @@ def dict_convert(pubmed_info, bib_dict, type_ref_dict):
     """Convert data from pubmed-like dictionary into bibtex-like dict."""
     new_dict = bib_dict
     author_string = ""
-    print pubmed_info["AuthorList"]
     for i in range(len(pubmed_info["AuthorList"])):
-        author_string += "{} {} and ".format(
+        author_string += u"{} {} and ".format(
             pubmed_info["AuthorList"][i]["ForeName"],
             pubmed_info["AuthorList"][i]["LastName"])
     new_dict["author"] = author_string[:-4]
-    new_dict["month"] = pubmed_info["PubDate"]["Month"]
-    new_dict["year"] = pubmed_info["PubDate"]["Year"]
+    if "Month" in pubmed_info["PubDate"]:
+        new_dict["month"] = pubmed_info["PubDate"]["Month"]
+    if "Year" in pubmed_info["PubDate"]:
+        new_dict["year"] = pubmed_info["PubDate"]["Year"]
     new_dict["volume"] = pubmed_info["Volume"]
     new_dict["title"] = pubmed_info["ArticleTitle"]
     new_dict["journal"] = pubmed_info["Title"]
+    new_dict["id"] = pubmed_info["PMID"]
     new_dict["number"] = pubmed_info["Issue"]
     new_dict["type"] = assign_type(type_ref_dict,
                                    pubmed_info["PublicationTypeList"])
-    return bib_dict
+    return new_dict
+
 
 
 def assign_type(pubtype_dict, pubtype_list):
@@ -55,7 +62,37 @@ def assign_type(pubtype_dict, pubtype_list):
     else:
         return "nonsense"
 
-bib_dict = {
+
+def check_quality(mydict):
+    """Check the contents of a bibtex-type dictionary before printing it.
+
+    Bibtex format will not crash if used with insufficient data, but does
+    expect certain fields to be populated depending on the type of record.
+
+    Raises UserWarning giving the type of the record and the missing field.
+    """
+    contains = []
+    for entry in mydict:
+        if mydict[entry] != "":
+            contains.append(entry)
+    if mydict["type"] == "article":
+        required = ["year", "title", "journal", "author", "volume"]
+    if mydict["type"] == "inproceedings":
+        required = ["year", "title", "booktitle", "author"]
+    if mydict["type"] == "proceedings":
+        required = ["year", "title"]
+    if mydict["type"] == "misc":
+        required = []
+    if mydict["type"] == "nonsense":
+        required = ["year", "title", "journal", "author", "volume"]
+    for entry in required:
+        if entry not in contains:
+            message = ("{}-type record "
+                       "would expect to contain an instance of {}").format(
+                           mydict["type"], entry)
+            warnings.warn(message)
+
+bib_dict={
     "type": "",
     "author": "",
     "address": "",
@@ -81,7 +118,8 @@ bib_dict = {
     "type": "",
     "volume": "",
     "year": "",
-}
+    "id": "",
+    }
 
 pubtype_dict = {
     "addresses": "proceedings",
@@ -118,4 +156,4 @@ citations = fetch.from_entrez(fetch.ref_dict, "heatmap", search=True, retmax=3)
 
 for citation in citations:
     populated_dict = dict_convert(citation, bib_dict.copy(), pubtype_dict)
-    print bibtex_string("yay", populated_dict)
+    print bibtex_string(populated_dict)
