@@ -18,7 +18,7 @@ def bibtex_string(bib_dict, id="default"):
     for key in bib_dict:
         if bib_dict[key] != "":
             output += "\t" + key + " = {" + bib_dict[key] + "},\n"
-    return output + "}"
+    return output + "}\n\n"
 
 
 def dict_convert(pubmed_info, bib_dict, type_ref_dict):
@@ -95,10 +95,11 @@ def check_quality(mydict):
 def format_convert(entrez_key, search=False, retmax=3):
         citations = fetch.from_entrez(fetch.ref_dict,
                                       entrez_key, retmax, search)
+        output = []
         for record in citations:
-            print bibtex_string(
-                dict_convert(record, bib_dict.copy(), pubtype_dict))
-
+             output.append(bibtex_string(
+                dict_convert(record, bib_dict.copy(), pubtype_dict)))
+        return output
 
 bib_dict = {
     "type": "",
