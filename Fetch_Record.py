@@ -117,10 +117,14 @@ ref_dict = {"AuthorList": "",
             "Title": "",        # Journal title
             "Issue": "",        # number
             "MedlinePgn": "",
-            "PMID": ""
+            "PMID": "",
+            "PublisherName": "",
+            "AbstractText": ""
             }
 
 
 Entrez.email = "simon.c.baron@gmail.com"
 
-r = from_entrez(ref_dict, "heatmap", retmax=1,search=True)
+if __name__ == "__main__":
+    r = from_entrez(ref_dict, "heatmap", retmax=3, search=True)
+    print r

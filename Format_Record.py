@@ -1,7 +1,7 @@
 """Formatting module for pubmed>bibtex converter.
 
-Calls the Fetch_Record module to get pubmed records via entrez,
-and formats them in a bibtex friendly format.
+Contains the functions necessary to convert a dictionary provided by the
+Fetch_Record module and format them in a bibtex friendly format.
 """
 
 import Fetch_Record as fetch
@@ -29,7 +29,7 @@ def dict_convert(pubmed_info, bib_dict, type_ref_dict):
         author_string += u"{} {} and ".format(
             pubmed_info["AuthorList"][i]["ForeName"],
             pubmed_info["AuthorList"][i]["LastName"])
-    new_dict["author"] = author_string[:-4]
+    new_dict["author"] = author_string[:-5]
     if "Month" in pubmed_info["PubDate"]:
         new_dict["month"] = pubmed_info["PubDate"]["Month"]
     if "Year" in pubmed_info["PubDate"]:
@@ -39,10 +39,10 @@ def dict_convert(pubmed_info, bib_dict, type_ref_dict):
     new_dict["journal"] = pubmed_info["Title"]
     new_dict["id"] = pubmed_info["PMID"]
     new_dict["number"] = pubmed_info["Issue"]
+    new_dict["abstract"] = pubmed_info["AbstractText"][0]
     new_dict["type"] = assign_type(type_ref_dict,
                                    pubmed_info["PublicationTypeList"])
     return new_dict
-
 
 
 def assign_type(pubtype_dict, pubtype_list):
@@ -87,12 +87,20 @@ def check_quality(mydict):
         required = ["year", "title", "journal", "author", "volume"]
     for entry in required:
         if entry not in contains:
-            message = ("{}-type record "
+            message = ("In record with pubmed id {}: \n{}-type record "
                        "would expect to contain an instance of {}").format(
-                           mydict["type"], entry)
+                           mydict["id"], mydict["type"], entry)
             warnings.warn(message)
 
-bib_dict={
+def format_convert(entrez_key, search=False, retmax=3):
+        citations = fetch.from_entrez(fetch.ref_dict,
+                                      entrez_key, retmax, search)
+        for record in citations:
+            print bibtex_string(
+                dict_convert(record, bib_dict.copy(), pubtype_dict))
+
+
+bib_dict = {
     "type": "",
     "author": "",
     "address": "",
@@ -109,7 +117,7 @@ bib_dict={
     "month": "",
     "note": "",
     "number": "",
-    "organization": "",
+    "organization": "",         # could be done - who hosted the conference?
     "pages": "",
     "publisher": "",
     "school": "",
@@ -119,6 +127,7 @@ bib_dict={
     "volume": "",
     "year": "",
     "id": "",
+    "abstract": ""
     }
 
 pubtype_dict = {
@@ -152,8 +161,9 @@ pubtype_dict = {
     "webcasts": "misc"
     }
 
-citations = fetch.from_entrez(fetch.ref_dict, "heatmap", search=True, retmax=3)
-
-for citation in citations:
-    populated_dict = dict_convert(citation, bib_dict.copy(), pubtype_dict)
-    print bibtex_string(populated_dict)
+if __name__ == "__main__":
+    citations = fetch.from_entrez(fetch.ref_dict,
+                                  "heatmap", search=True, retmax=3)
+    for citation in citations:
+        populated_dict = dict_convert(citation, bib_dict.copy(), pubtype_dict)
+        print bibtex_string(populated_dict)
