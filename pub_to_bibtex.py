@@ -2,23 +2,14 @@
 
 Requires Fetch_Record and Format_Record in the same directory.
 
-parser design:
-1. get record given id
- - should support multiple ids
- - should support writing to file
+Basic help available, use:
+$python pub_to_bibtex.py -h
 
-2. search given a string
- - needs to return n records
+For more usage and documentation please see the readme file available from
+https://github.com/SimonBaron/pubmed-to-bibtex
 
-eg:
-
-1. python pub_to_bibtex.py 239487 987348 987343
-   python pub_to_bibtex.py -f mybib.bib 239487 987348 987343
-
-2. python pub_to_bibtex.py -s "the title of some paper" (-f)
-
-test input = 26944449 18206625
-
+Please remember to replace the email variable with your correct email address
+This is passed to Entrez along with queries.
 """
 
 import Fetch_Record
@@ -26,6 +17,23 @@ import Fetch_Record
 import Format_Record
 
 import argparse
+
+
+class EmailError(Exception):
+    """Raise an error if email is not set correctly."""
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+email = "simon.c.baron@gmail.com"
+
+if email == "email@email":
+    raise EmailError("You should always tell Entrez who you are - "
+                     "please edit pub_to_bibtex.py and "
+                     "replace the string with your own")
 
 parser = argparse.ArgumentParser(
     description='Get a pubmed file and print a bibtex format citation.')
@@ -42,7 +50,7 @@ parser.add_argument('--s', dest='search',
 parser.add_argument('-n', metavar='n', type=int, nargs='?',
                     help="number of records(only used if searching)")
 
-parser.add_argument('--f', metavar='file_name', type=str, nargs='?',
+parser.add_argument('-f', metavar='file_name', type=str, nargs='?',
                     help="if present will write to file")
 
 args = parser.parse_args()
@@ -52,16 +60,11 @@ if args.search:
 else:
     entrez_input = ",".join(args.pubmed_id)
 
-# print entrez_input
 
-# print args.n
-
-# print args.f is not None
-
-bibtex = Format_Record.format_convert(entrez_input,
+bibtex = Format_Record.format_convert(entrez_input, email,
                                       search=args.search, retmax=args.n)
 
-if args.f is not None:
+if args.f is not None:          # if -f filename selected
     print "writing to file: {}".format(args.f)
     with open(args.f, 'w') as myfile:
         for record in bibtex:

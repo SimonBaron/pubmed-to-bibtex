@@ -2,6 +2,16 @@
 
 Contains the functions necessary to convert a dictionary provided by the
 Fetch_Record module and format them in a bibtex friendly format.
+
+Globally defined dictionaries bib_dict and pubtype_dict act as templates.
+
+bib_dict is a dictionary which when populated can be printed as a bibtex
+string,
+
+pubtype_dict contains the conversions of pubmed record types into bibtex
+types.
+
+Includes basic warning functionality.
 """
 
 import Fetch_Record as fetch
@@ -22,14 +32,27 @@ def bibtex_string(bib_dict, id="default"):
 
 
 def dict_convert(pubmed_info, bib_dict, type_ref_dict):
-    """Convert data from pubmed-like dictionary into bibtex-like dict."""
+    """Convert data from pubmed-like dictionary into bibtex-like dict.
+
+    calls auxilliary functions for more complex conversions such as type.
+
+    pubmed_info is a dict of fetch.ref_dict format, containing the parsed
+    information from a pubmed record.
+
+    bib_dict is a COPY of globally defined bib_dict which will be populated
+    and returned.
+
+    type_ref_dict is a dictionary of type conversions such as pubtype_dict.
+
+    known issue - if author has not included "ForeName" will crash.
+    """
     new_dict = bib_dict
     author_string = ""
     for i in range(len(pubmed_info["AuthorList"])):
-        author_string += u"{} {} and ".format(
+        author_string += u"{} {} and ".format(  # unicode support
             pubmed_info["AuthorList"][i]["ForeName"],
             pubmed_info["AuthorList"][i]["LastName"])
-    new_dict["author"] = author_string[:-5]
+    new_dict["author"] = author_string[:-5]  # slice off the final " and "
     if "Month" in pubmed_info["PubDate"]:
         new_dict["month"] = pubmed_info["PubDate"]["Month"]
     if "Year" in pubmed_info["PubDate"]:
@@ -46,7 +69,7 @@ def dict_convert(pubmed_info, bib_dict, type_ref_dict):
 
 
 def assign_type(pubtype_dict, pubtype_list):
-    """Assign a bibtex type to a pubmed typelist."""
+    """Assign a bibtex type to a list of  pubmed types."""
     possibles = []
     for pubtype in pubtype_list:
         if pubtype.lower() in [word.lower() for word in pubtype_dict.keys()]:
@@ -92,14 +115,21 @@ def check_quality(mydict):
                            mydict["id"], mydict["type"], entry)
             warnings.warn(message)
 
-def format_convert(entrez_key, search=False, retmax=3):
-        citations = fetch.from_entrez(fetch.ref_dict,
-                                      entrez_key, retmax, search)
-        output = []
-        for record in citations:
-             output.append(bibtex_string(
-                dict_convert(record, bib_dict.copy(), pubtype_dict)))
-        return output
+
+def format_convert(entrez_key, email, search=False, retmax=3):
+    """Converts parametric input to functions.
+
+    passes inputs for entrez term (id or search strings),
+    email (string format email of querier),
+    search boolean selection and retmax to correct functions to output
+    a list of formatted bibtex strings."""
+    citations = fetch.from_entrez(fetch.ref_dict,
+                                  entrez_key, email, retmax, search)
+    output = []
+    for record in citations:
+        output.append(bibtex_string(
+            dict_convert(record, bib_dict.copy(), pubtype_dict)))
+    return output
 
 bib_dict = {
     "type": "",
