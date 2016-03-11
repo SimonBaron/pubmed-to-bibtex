@@ -66,15 +66,15 @@ eg:
 
 return 20 (default) citations about heatmaps
 
-    $python pub_to_bibtex.py --s -n 3 heatmaps
+    $python pub_to_bibtex.py --s -n 3 heatmaps are pretty
 
-return citations for the first 3 entrez search results for the phrase "heatmaps"
+return citations for the first 3 entrez search results for the phrase "heatmaps are pretty".
 
     $python pub_to_bibtex.py --s -n 3 heatmaps -f mybib.bib
 
 create or overwrite a file (mybib.bib) containing the first 3 entrez search results for the phrase "heatmaps"
 
-Search functionality is provided by Entrez esearch, details can be found on their [help page](http://www.ncbi.nlm.nih.gov/books/NBK25499/#chapter4.ESearch)
+Search functionality is provided by Entrez esearch, details can be found on their [help page](http://www.ncbi.nlm.nih.gov/books/NBK25499/#chapter4.ESearch).
 
 ## Contact
 
