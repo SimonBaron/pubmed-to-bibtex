@@ -29,7 +29,7 @@ class EmailError(Exception):
     def __str__(self):
         return repr(self.value)
 
-email = "simon.c.baron@gmail.com"
+email = "email@email"
 
 if email == "email@email":
     raise EmailError("You should always tell Entrez who you are - "
