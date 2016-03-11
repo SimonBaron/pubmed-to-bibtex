@@ -1,9 +1,11 @@
 # Pubmed to Bibtex
 A Python 2.7 tool that searches for a pubmed record and returns a bibtex citation.
 
+Created as part of my MSc in Bioinformatics at Newcastle University
+
 ## Version History
 
-**Version 0.0.1** - current version
+**Version 0.0.1** (11/3/16) - current version
 
 ## Dependencies
 
@@ -77,10 +79,10 @@ Search functionality is provided by Entrez esearch, details can be found on thei
 
 For help or bug reports or development suggestions, contact me at simon.c.baron@gmail.com.
 
-## Future changes
+## Future changes planned
 
-[] Better error handling. As pubmed XML records are provided by authors who do not always follow the guidelines set down (and neither does the NCBI) error and warning handling are vital. Currently if you return 20 results and even one of them throws an error you get nothing, obviously this could be avoided.
+- [ ] Better error handling. As pubmed XML records are provided by authors who do not always follow the guidelines set down (and neither does the NCBI) error and warning handling are vital. Currently if you return 20 results and even one of them throws an error you get nothing, obviously this could be avoided.
+- [ ] Parsing an NCBI .txt download for collections or bibliograhies, allowing you to convert an existing PubMed collection to a bibtex bibliography.
+- [ ] More complete text mining of PubMed XML - extend the information I can recover to more of bibtex fields.
 
-[] Parsing an NCBI .txt download for collections or bibliograhies, allowing you to convert an existing PubMed collection to a bibtex bibliography.
-
-[] More complete text mining of PubMed XML - extend the information I can recover to more of bibtex fields
+Feel free to send me a branch request if you would like to help with any part of this.
