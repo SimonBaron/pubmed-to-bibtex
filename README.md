@@ -38,7 +38,7 @@ Flag | Name | Description
 -f | file output | By default we display plain text in the command line, which can be copied into a .bib file, select this argument if you want to write to a text file.
 --s | search | Enables searching functionality, replacing pubmed ids with a seach string
 -n | number of entries | If searching is enabled, allows you to set the number of records to be returned from pubmed. Uses Entrez default of 20 if not specified.
-
+-log | warnings | Create a log file for warnings generated
 Any argument that comes directly after a -flag will be considered to be the argument of that flag, eg -f filename or -n number
 Double flags (--s is the only one currently implemented) are options that do not require an arguement.
 
@@ -83,6 +83,9 @@ Warnings of type UserWarning are generated if a bibtex record does not meet expe
 UserWarnings with message "failed to convert PMID:" indicate that one of the records has been unable to format correctly and will not be included.
 
 This behaviour is designed to prevent a full crash if a record is not formatted in the expected manner.
+
+-log filename can be used to create a file to store warning information.
+
 ## Contact
 
 For help or bug reports or development suggestions, contact me at simon.c.baron@gmail.com.
@@ -90,7 +93,7 @@ For help or bug reports or development suggestions, contact me at simon.c.baron@
 ## Future changes planned
 
 - [x] Better error handling. As pubmed XML records are provided by authors who do not always follow the guidelines set down (and neither does the NCBI) error and warning handling are vital. Currently if you return 20 results and even one of them throws an error you get nothing, obviously this could be avoided.
-- [ ] Logging of warnings and errors generated
+- [x] Logging of warnings and errors generated
 - [ ] Parsing an NCBI .txt download for collections or bibliograhies, allowing you to convert an existing PubMed collection to a bibtex bibliography.
 - [ ] More complete text mining of PubMed XML - extend the information I can recover to more of bibtex fields.
 

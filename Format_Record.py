@@ -74,12 +74,14 @@ def assign_author(pubauthor_list, pmid):
         try:
             FN = author["ForeName"]
         except KeyError:
-            print "{} has an author with no forename".format(pmid)
+            error = "{} has an author with no forename".format(pmid)
+            warnings.warn(error)
             FN = ""
         try:
             LN = author["LastName"]
         except KeyError:
-            print "{} has an author with no lastname".format(pmid)
+            error = "{} has an author with no lastname".format(pmid)
+            warnings.warn(error)
             LN = ""
         author_string += u"{} {} and ".format(FN, LN)
     return author_string[:-5]   # slice off the final " and "
@@ -141,7 +143,7 @@ def format_convert(entrez_key, email, search=False, retmax=3):
     a list of formatted bibtex strings.
 
     try and except used to downgrade errors for a single record into
-    warnings for the entire process. Logs comming soonTM.
+    warnings for the entire process.
     """
     citations = fetch.from_entrez(fetch.ref_dict,
                                   entrez_key, email, retmax, search)

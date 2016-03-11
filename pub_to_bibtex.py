@@ -18,6 +18,7 @@ import Format_Record
 
 import argparse
 
+import logging
 
 class EmailError(Exception):
     """Raise an error if email is not set correctly."""
@@ -51,9 +52,17 @@ parser.add_argument('-n', metavar='n', type=int, nargs='?',
                     help="number of records(only used if searching)")
 
 parser.add_argument('-f', metavar='file_name', type=str, nargs='?',
-                    help="if present will write to file")
+                    help="if present will write output to file")
+
+parser.add_argument('-log', metavar='log file', type=str, nargs='?',
+                    help="if present will write logs to file")
 
 args = parser.parse_args()
+
+if args.log is not None:
+    logging.basicConfig(filename=args.log)
+    logging.captureWarnings(True)
+    print "writing logs to {}".format(args.log)
 
 if args.search:
     entrez_input = " ".join(args.pubmed_id)
@@ -65,7 +74,7 @@ bibtex = Format_Record.format_convert(entrez_input, email,
                                       search=args.search, retmax=args.n)
 
 if args.f is not None:          # if -f filename selected
-    print "writing to file: {}".format(args.f)
+    print "writing output to file: {}".format(args.f)
     with open(args.f, 'w') as myfile:
         for record in bibtex:
             myfile.write(record.encode('utf8'))
