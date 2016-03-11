@@ -27,7 +27,7 @@ Please abide by the [Entrez usage guildlines](http://www.ncbi.nlm.nih.gov/books/
 
 call the function using  Python from a terminal, eg:
 
-$python pub_to_bibtex.py [arguments]
+**$**python pub_to_bibtex.py [arguments]
 
 [arguments] to be replaced with options from among the following
 
@@ -45,33 +45,34 @@ Double flags (--s is the only one currently implemented) are options that do not
 ### Return citations by pubmed ID
 
 eg:
-$python pub_to_bibtex.py 26944449
 
-*return bibtex format for pubmed article with id 26944449*
+    $python pub_to_bibtex.py 26944449
 
-$python pub_to_bibtex.py 26944449 18206625
+ return bibtex format for pubmed article with id 26944449
 
-*sequentially return multiple article, ids 26944449 and 18206625*
+    $python pub_to_bibtex.py 26944449 18206625
 
-$python pub_to_bibtex.py 26944449 18206625 -f filename.bib
+sequentially return multiple article, ids 26944449 and 18206625
 
-*create (or overwrite) file "filename.bib" containing bibtex format citations for articles 26944449 and 18206625*
+    python pub_to_bibtex.py 26944449 18206625 -f filename.bib
+
+create (or overwrite) file "filename.bib" containing bibtex format citations for articles 26944449 and 18206625
 
 ### Search functionality
 
 eg:
 
-$python pub_to_bibtex.py --s heatmaps
+    $python pub_to_bibtex.py --s heatmaps
 
-*return 20 (default) citations about heatmaps*
+return 20 (default) citations about heatmaps
 
-$python pub_to_bibtex.py --s -n 3 heatmaps
+    $python pub_to_bibtex.py --s -n 3 heatmaps
 
-*return citations for the first 3 entrez search results for the phrase "heatmaps"*
+return citations for the first 3 entrez search results for the phrase "heatmaps"
 
-$python pub_to_bibtex.py --s -n 3 heatmaps -f mybib.bib
+    $python pub_to_bibtex.py --s -n 3 heatmaps -f mybib.bib
 
-*create or overwrite a file (mybib.bib) containing the first 3 entrez search results for the phrase "heatmaps"*
+create or overwrite a file (mybib.bib) containing the first 3 entrez search results for the phrase "heatmaps"
 
 Search functionality is provided by Entrez esearch, details can be found on their [help page](http://www.ncbi.nlm.nih.gov/books/NBK25499/#chapter4.ESearch)
 
