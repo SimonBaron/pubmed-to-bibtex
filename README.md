@@ -13,7 +13,7 @@ This was built using Python 2.7 and [Biopython](http://biopython.org/wiki/Main_P
 
 ## Installation
 
-Nothing too complex - simply unpack all 3 Python files into a single directory.
+Nothing too complex - simply unpack all three Python files into a single directory.
 
 You will need to open pub_to_bibtex.py in an editor of your choice to set your email address.
 
