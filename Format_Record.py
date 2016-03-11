@@ -34,7 +34,7 @@ def bibtex_string(bib_dict, id="default"):
 def dict_convert(pubmed_info, bib_dict, type_ref_dict):
     """Convert data from pubmed-like dictionary into bibtex-like dict.
 
-    calls auxilliary functions for more complex conversions such as type.
+    calls auxilliary functions for more complex conversions: type and name.
 
     pubmed_info is a dict of fetch.ref_dict format, containing the parsed
     information from a pubmed record.
@@ -47,12 +47,6 @@ def dict_convert(pubmed_info, bib_dict, type_ref_dict):
     known issue - if author has not included "ForeName" will crash.
     """
     new_dict = bib_dict
-    author_string = ""
-    for i in range(len(pubmed_info["AuthorList"])):
-        author_string += u"{} {} and ".format(  # unicode support
-            pubmed_info["AuthorList"][i]["ForeName"],
-            pubmed_info["AuthorList"][i]["LastName"])
-    new_dict["author"] = author_string[:-5]  # slice off the final " and "
     if "Month" in pubmed_info["PubDate"]:
         new_dict["month"] = pubmed_info["PubDate"]["Month"]
     if "Year" in pubmed_info["PubDate"]:
@@ -63,10 +57,32 @@ def dict_convert(pubmed_info, bib_dict, type_ref_dict):
     new_dict["id"] = pubmed_info["PMID"]
     new_dict["number"] = pubmed_info["Issue"]
     new_dict["abstract"] = pubmed_info["AbstractText"][0]
+    new_dict["author"] = assign_author(pubmed_info["AuthorList"],
+                                       pubmed_info["PMID"])
     new_dict["type"] = assign_type(type_ref_dict,
                                    pubmed_info["PublicationTypeList"])
     return new_dict
 
+
+def assign_author(pubauthor_list, pmid):
+    """Format a string of author names.
+
+    Pubmed type is to have a list of dictionaries, one
+    for each author. Bibtex format takes a single string."""
+    author_string = ""
+    for author in pubauthor_list:
+        try:
+            FN = author["ForeName"]
+        except KeyError:
+            print "{} has an author with no forename".format(pmid)
+            FN = ""
+        try:
+            LN = author["LastName"]
+        except KeyError:
+            print "{} has an author with no lastname".format(pmid)
+            LN = ""
+        author_string += u"{} {} and ".format(FN, LN)
+    return author_string[:-5]   # slice off the final " and "
 
 def assign_type(pubtype_dict, pubtype_list):
     """Assign a bibtex type to a list of  pubmed types."""
@@ -122,13 +138,22 @@ def format_convert(entrez_key, email, search=False, retmax=3):
     passes inputs for entrez term (id or search strings),
     email (string format email of querier),
     search boolean selection and retmax to correct functions to output
-    a list of formatted bibtex strings."""
+    a list of formatted bibtex strings.
+
+    try and except used to downgrade errors for a single record into
+    warnings for the entire process. Logs comming soonTM.
+    """
     citations = fetch.from_entrez(fetch.ref_dict,
                                   entrez_key, email, retmax, search)
     output = []
     for record in citations:
-        output.append(bibtex_string(
-            dict_convert(record, bib_dict.copy(), pubtype_dict)))
+        try:
+            c_record = dict_convert(record, bib_dict.copy(), pubtype_dict)
+        except:
+            message = "failed to convert PMID: {}".format(record["PMID"])
+            message += "\ncontinuing with other records."
+            warnings.warn(message)
+        output.append(bibtex_string(c_record))
     return output
 
 bib_dict = {

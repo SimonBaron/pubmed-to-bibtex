@@ -76,13 +76,21 @@ create or overwrite a file (mybib.bib) containing the first 3 entrez search resu
 
 Search functionality is provided by Entrez esearch, details can be found on their [help page](http://www.ncbi.nlm.nih.gov/books/NBK25499/#chapter4.ESearch).
 
+## Warnings
+
+Warnings of type UserWarning are generated if a bibtex record does not meet expectations, eg an article which doesn't contain any title. These are printed to the shell. If you are having trouble reading them them I would recommend writing your bibtex to a file.
+
+UserWarnings with message "failed to convert PMID:" indicate that one of the records has been unable to format correctly and will not be included.
+
+This behaviour is designed to prevent a full crash if a record is not formatted in the expected manner.
 ## Contact
 
 For help or bug reports or development suggestions, contact me at simon.c.baron@gmail.com.
 
 ## Future changes planned
 
-- [ ] Better error handling. As pubmed XML records are provided by authors who do not always follow the guidelines set down (and neither does the NCBI) error and warning handling are vital. Currently if you return 20 results and even one of them throws an error you get nothing, obviously this could be avoided.
+- [x] Better error handling. As pubmed XML records are provided by authors who do not always follow the guidelines set down (and neither does the NCBI) error and warning handling are vital. Currently if you return 20 results and even one of them throws an error you get nothing, obviously this could be avoided.
+- [ ] Logging of warnings and errors generated
 - [ ] Parsing an NCBI .txt download for collections or bibliograhies, allowing you to convert an existing PubMed collection to a bibtex bibliography.
 - [ ] More complete text mining of PubMed XML - extend the information I can recover to more of bibtex fields.
 
