@@ -94,7 +94,7 @@ For help or bug reports or development suggestions, contact me at simon.c.baron@
 
 - [x] Better error handling. As pubmed XML records are provided by authors who do not always follow the guidelines set down (and neither does the NCBI) error and warning handling are vital. Currently if you return 20 results and even one of them throws an error you get nothing, obviously this could be avoided.
 - [x] Logging of warnings and errors generated
-- [ ] Post-processing of text to deal with % characters (particularly in abstracts where they break formatting). Replace with \%. 
+- [ ] Post-processing of text to deal with % characters (particularly in abstracts where they break formatting). Replace with \%. Also investigate double bracketing capitals to preserve acronyms from paper titles.
 - [ ] Parsing an NCBI .txt download for collections or bibliograhies, allowing you to convert an existing PubMed collection to a bibtex bibliography.
 - [ ] More complete text mining of PubMed XML - extend the information I can recover to more of bibtex fields. eg. dio links
 
